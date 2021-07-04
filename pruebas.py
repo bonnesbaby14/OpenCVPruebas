@@ -29,8 +29,8 @@ import numpy as np
 #cv.destroyAllWindows()
 
 
-#detectar colores 
-
+#detectar colores
+"""
 captura=cv.VideoCapture(0)
 
 redBajo1 = np.array([0, 70, 20], np.uint8)
@@ -44,13 +44,67 @@ redAlto2=np.array([179, 255, 255], np.uint8)
 while(captura.isOpened()):
     ret,imagen=captura.read()
     if ret==True:
+        
         frameHSV=cv.cvtColor(imagen,cv.COLOR_BGR2HSV)
         maskRed1 = cv.inRange(frameHSV, redBajo1, redAlto1)
         maskRed2 = cv.inRange(frameHSV, redBajo2, redAlto2)
+        
         maskRed = cv.add(maskRed1, maskRed2)
+        
         maskRedvis=cv.bitwise_and(imagen,imagen,mask=maskRed)
-        cv.imshow('maskRed', maskRedvis)
-        cv.imshow("video",imagen)
+        cv.imshow('Colores rojo', maskRedvis)
+        cv.imshow("Original",imagen)
+        
+  
+        if cv.waitKey(1)==ord("a"):
+            break
+captura.release()
+cv.destroyAllWindows()
+
+"""
+
+#detectar coloresy contornealos con cordenadas
+captura=cv.VideoCapture(0)
+
+redBajo1 = np.array([0, 50, 20], np.uint8)
+redAlto1 = np.array([8, 255, 255], np.uint8)
+
+redBajo2=np.array([175, 50, 20], np.uint8)
+redAlto2=np.array([179, 255, 255], np.uint8)
+
+
+
+while(captura.isOpened()):
+    ret,imagen=captura.read()
+    if ret==True:
+        
+        frameHSV=cv.cvtColor(imagen,cv.COLOR_BGR2HSV)
+        maskRed1 = cv.inRange(frameHSV, redBajo1, redAlto1)
+        maskRed2 = cv.inRange(frameHSV, redBajo2, redAlto2)
+        
+        maskRed = cv.add(maskRed1, maskRed2)
+        
+        maskRedvis=cv.bitwise_and(imagen,imagen,mask=maskRed)
+        
+        
+        contornos,_=cv.findContours(maskRed, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)
+        
+        
+        for c in contornos:
+            area=cv.contourArea(c)
+            if area>5000:
+                M=cv.moments(c)
+                if(M["m00"]==0):M["m00"]=1
+                x=int(M["m10"]/M["m00"])
+                y=int(M["m01"]/M["m00"])
+                cv.circle(imagen,(x,y), 7, (255,0,0))
+                
+                nuevoContorno=cv.convexHull(c)
+                cv.drawContours(imagen, [nuevoContorno], 0, (255,0,0),3)        
+        
+     
+       # cv.imshow('Colores rojo', maskRedvis)
+        cv.imshow("Original",imagen)
         
   
         if cv.waitKey(1)==ord("a"):
