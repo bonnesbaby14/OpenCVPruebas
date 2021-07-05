@@ -1,7 +1,7 @@
 import sys
 import cv2 as cv
 import numpy as np
-
+from funciones import dibujar
 #convertir una imgaen en gris__________________________
 #imagen = cv.imread("uno.png",0)
 
@@ -72,35 +72,34 @@ redAlto1 = np.array([8, 255, 255], np.uint8)
 redBajo2=np.array([175, 50, 20], np.uint8)
 redAlto2=np.array([179, 255, 255], np.uint8)
 
+azulBajo=np.array([100, 100, 20], np.uint8)
+azulAlto=np.array([125, 255, 255], np.uint8)
 
+amarilloBajo=np.array([15, 100, 20], np.uint8)
+amarilloAlto=np.array([45, 255, 255], np.uint8)
 
 while(captura.isOpened()):
     ret,imagen=captura.read()
     if ret==True:
         
         frameHSV=cv.cvtColor(imagen,cv.COLOR_BGR2HSV)
+        
+        maskAzul= cv.inRange(frameHSV,azulBajo,azulAlto)
+        maskAmarillo= cv.inRange(frameHSV,amarilloBajo,amarilloAlto)
+        
         maskRed1 = cv.inRange(frameHSV, redBajo1, redAlto1)
         maskRed2 = cv.inRange(frameHSV, redBajo2, redAlto2)
         
         maskRed = cv.add(maskRed1, maskRed2)
+
+        dibujar(maskAzul,(255,0,0),cv,imagen)
+        dibujar(maskAmarillo,(0,255,255),cv,imagen)
+        dibujar(maskRed,(0,0,255),cv,imagen)
         
-        maskRedvis=cv.bitwise_and(imagen,imagen,mask=maskRed)
         
         
-        contornos,_=cv.findContours(maskRed, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)
         
         
-        for c in contornos:
-            area=cv.contourArea(c)
-            if area>5000:
-                M=cv.moments(c)
-                if(M["m00"]==0):M["m00"]=1
-                x=int(M["m10"]/M["m00"])
-                y=int(M["m01"]/M["m00"])
-                cv.circle(imagen,(x,y), 7, (255,0,0))
-                
-                nuevoContorno=cv.convexHull(c)
-                cv.drawContours(imagen, [nuevoContorno], 0, (255,0,0),3)        
         
      
        # cv.imshow('Colores rojo', maskRedvis)
